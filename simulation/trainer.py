@@ -1,8 +1,8 @@
 # =============================================================================
 # 🛡️ EmergenceLab v5 — Multi-Agent Trainer
-# File        : trainer.py
-# Author      : AHMED ZARAI
-# Purpose     : Generate live entropy, KL, connectivity, and beliefs for dashboard
+# File         : trainer.py
+# Author       : AHMED ZARAI
+# Purpose      : Generate live entropy, KL, connectivity, and beliefs for dashboard
 # =============================================================================
 
 import os
@@ -16,7 +16,6 @@ import numpy as np
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
 LIVE_JSON = os.path.join(RESULTS_DIR, "live_dashboard.json")
-
 
 # =============================================================================
 # 🔎 Trainer Class
@@ -36,13 +35,16 @@ class Trainer:
     # -------------------------------------------------------------------------
     def __init__(self):
         os.makedirs(RESULTS_DIR, exist_ok=True)
-        self.steps = 10000  # Total simulation steps
+        # self.steps is now handled by the infinite loop
 
     # -------------------------------------------------------------------------
-    # 🚀 Training Loop
+    # 🚀 Training Loop (Infinite for Cloud Deployment)
     # -------------------------------------------------------------------------
     def train(self):
-        for step in range(self.steps):
+        step = 0
+        print("🚀 Evolution Engine Started... (Infinite Loop Active)")
+        
+        while True:  # Simulation now runs 24/7
             entropy = float(np.random.rand())
             kl = float(np.random.rand())
             connectivity = float(np.random.rand())
@@ -52,14 +54,18 @@ class Trainer:
             ]
             kl_matrix = np.random.rand(5, 5).tolist()
 
-            # Log simulation progress to console
-            print(f"Step {step} | H={entropy:.4f} | KL={kl:.4f} | C={connectivity:.4f}")
+            # Log simulation progress to Render console
+            print(f"RESEARCH: Step {step} | H={entropy:.4f} | KL={kl:.4f} | C={connectivity:.4f}")
 
             # Update live dashboard JSON
             self._write_dashboard(step, entropy, kl, connectivity, beliefs, kl_matrix)
 
-            # Simulation pacing (20Hz)
-            time.sleep(0.05)
+            step += 1
+
+            # 🛡️ SAFETY DELAY: 
+            # 1 second prevents CPU overload on Render Free Tier 
+            # and keeps the dashboard stable.
+            time.sleep(1.0)
 
     # -------------------------------------------------------------------------
     # 💾 Safe JSON Write for Live Dashboard
@@ -76,15 +82,14 @@ class Trainer:
             "kl": kl,
             "connectivity": connectivity,
             "beliefs": beliefs,
-            "kl_matrix": kl_matrix
+            "kl_matrix": kl_matrix,
+            "last_update": time.ctime() # Helpful for debugging
         }
 
         try:
-            # On Windows, 'w' mode is safer than 'os.replace' when 
-            # another process (websocket.py) is watching the file.
+            # Overwrites the file so it never grows too large
             with open(final_path, "w") as f:
                 json.dump(data, f)
         except PermissionError:
-            # If the file is momentarily locked by the watcher, 
-            # we just skip this one frame rather than crashing.
+            # If the file is momentarily locked, skip to next step
             pass
