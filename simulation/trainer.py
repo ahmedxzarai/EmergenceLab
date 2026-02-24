@@ -13,7 +13,8 @@ import numpy as np
 # -----------------------------------------------------------------------------
 # 📂 Results Path Configuration
 # -----------------------------------------------------------------------------
-RESULTS_DIR = "results"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESULTS_DIR = os.path.join(BASE_DIR, "results")
 LIVE_JSON = os.path.join(RESULTS_DIR, "live_dashboard.json")
 
 

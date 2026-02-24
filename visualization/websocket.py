@@ -30,7 +30,8 @@ socketio = SocketIO(
 # -----------------------------------------------------------------------------
 # 📊 Live Dashboard JSON Path
 # -----------------------------------------------------------------------------
-DATA_PATH = "results/live_dashboard.json"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, "results", "live_dashboard.json")
 
 
 # =============================================================================
