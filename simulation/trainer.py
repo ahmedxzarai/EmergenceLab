@@ -65,9 +65,8 @@ class Trainer:
     # -------------------------------------------------------------------------
     def _write_dashboard(self, step, entropy, kl, connectivity, beliefs, kl_matrix):
         """
-        Writes dashboard data to JSON safely to avoid file lock errors.
+        Writes dashboard data to JSON safely for both Windows and Linux.
         """
-        tmp_path = os.path.join(RESULTS_DIR, "live_dashboard.tmp")
         final_path = LIVE_JSON
 
         data = {
@@ -79,14 +78,12 @@ class Trainer:
             "kl_matrix": kl_matrix
         }
 
-        # Write temp file first
-        with open(tmp_path, "w") as f:
-            json.dump(data, f)
-
-        # Atomic replace for safe live updates
         try:
-            os.replace(tmp_path, final_path)
+            # On Windows, 'w' mode is safer than 'os.replace' when 
+            # another process (websocket.py) is watching the file.
+            with open(final_path, "w") as f:
+                json.dump(data, f)
         except PermissionError:
-            # Windows fallback if file is locked
-            os.remove(final_path)
-            os.replace(tmp_path, final_path)
+            # If the file is momentarily locked by the watcher, 
+            # we just skip this one frame rather than crashing.
+            pass
