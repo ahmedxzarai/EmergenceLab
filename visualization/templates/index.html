@@ -167,7 +167,9 @@
     animateBG();
 
     // Core WebSocket & Charts
-    const socket = io();
+    const socket = io({
+    transports: ["websocket", "polling"]
+                      });
     let charts={}, entropyHistory=[], connectivityHistory=[], lastData=null;
     const agentColors=["#00F5D4","#FF3CAC","#FFD166","#9B5DE5","#00BBF9","#F15BB5","#06D6A0","#EF476F"];
     const baseOptions={responsive:true, maintainAspectRatio:false, animation:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{display:false},grid:{display:false}},y:{ticks:{color:"#888",font:{size:9}},grid:{color:"rgba(255,255,255,0.03)"}}}};
