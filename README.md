@@ -37,23 +37,31 @@ Public Deployment: emergencelab.onrender.com
 By utilizing **Variational Free Energy** minimization and **Information-Theoretic constraints**, the system demonstrates that agents subjected to environmental noise will spontaneously develop low-entropy communication protocols to ensure survival and predictive accuracy.
 
 ---
-#  📐 Theoretical Framework & Formalisms
+# 📐 Theoretical Framework & Formalisms
 ---
 
 The system models intelligence as a **contraction mapping** within a high-dimensional belief space.
 
 ## 2.1 Collective Entropy Collapse
 We define the global uncertainty of the system $S$ at time $t$ using Shannon Entropy:
+
 $$H(S_t) = -\sum_{s \in \mathcal{S}} P(s) \log P(s)$$
+
 The emergence of "intelligence" is quantified by the decay constant $\lambda$ where $\mathbb{E}[H_t] \approx H_0 e^{-\lambda t}$.
 
 ## 2.2 Epistemic Convergence (KL-Divergence)
 Consensus is reached when the divergence between individual agent belief distributions $B_i$ and $B_j$ vanishes:
-$$\mathcal{L}_{consensus} = \frac{1}{N^2} \sum_{i,j} D_{KL}(B_i \parallel B_j) \to 0$$
+
+$$
+\mathcal{L}_{consensus} = \frac{1}{N^2} \sum_{i,j} D_{KL}(B_i \parallel B_j) \to 0
+$$
 
 ## 2.3 Active Inference & Free Energy
 Each agent $i$ functions as a variational inferer, minimizing its local Variational Free Energy $\mathcal{F}_i$:
-$$\mathcal{F}_i \approx \underbrace{D_{KL}(q_i(S) \parallel P(S|O_i))}_{\text{Accuracy/Divergence}} + \underbrace{H(q_i)}_{\text{Complexity}}$$
+
+$$
+\mathcal{F}_i \approx \underbrace{D_{KL}(q_i(S) \parallel P(S|O_i))}_{\text{Accuracy/Divergence}} + \underbrace{H(q_i)}_{\text{Complexity}}
+$$
 
 ---
 # 🏗 System Architecture
