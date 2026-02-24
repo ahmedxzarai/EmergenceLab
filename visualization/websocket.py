@@ -24,7 +24,7 @@ app = Flask(
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    async_mode='threading'  # ensures compatibility with Render/Docker
+    async_mode='gevent'  # Change 'threading' to 'gevent'
 )
 
 # -----------------------------------------------------------------------------
