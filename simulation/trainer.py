@@ -35,7 +35,7 @@ class Trainer:
     # -------------------------------------------------------------------------
     def __init__(self):
         os.makedirs(RESULTS_DIR, exist_ok=True)
-        self.steps = 500  # Total simulation steps
+        self.steps = 10000  # Total simulation steps
 
     # -------------------------------------------------------------------------
     # 🚀 Training Loop
