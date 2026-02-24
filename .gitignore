@@ -21,3 +21,6 @@ Dockerfile
 # IDE / editor
 .vscode/
 .idea/
+
+# Data and Results
+results/
