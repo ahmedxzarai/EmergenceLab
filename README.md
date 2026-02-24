@@ -292,9 +292,9 @@ LIVE AT: http://localhost:5000
 
 ```bash
 docker build -t emergencelab .
-docker run -p 5001:5001 emergencelab
+docker run -p 5000:5000 emergencelab
 ```
-OPEN: http://localhost:5001
+OPEN: http://localhost:5000
 
 ---
 # ☁️ Cloud Deployment (Render)
