@@ -1,0 +1,32 @@
+# =============================================================================
+# 🛡️ EmergenceLab v5 — Aggressive Consensus Stress-Test
+# Purpose     : High-load multi-agent simulation for extreme stochasticity analysis
+# =============================================================================
+
+environment:
+  # ---------------------------------------------------------------------------
+  # 🌐 World State Configuration
+  # ---------------------------------------------------------------------------
+  state_dim: 12          # Increased complexity of the world state
+  steps: 2500            # Extended duration for deeper entropy analysis
+  noise_level: 0.15      # 7.5x increase from baseline (Extreme stochasticity)
+  seed: 777              # Fixed seed for research reproducibility
+
+agents:
+  # ---------------------------------------------------------------------------
+  # 🤖 Agent Configuration
+  # ---------------------------------------------------------------------------
+  num_agents: 6         # Doubled agent count to test scaling of D_KL matrix
+  coupling_alpha: 0.05   # Weak coupling: agents work harder for consensus
+  vocabulary_size: 16    # Symbolic constraints on exchange
+
+training:
+  # ---------------------------------------------------------------------------
+  # ⚡ Simulation & Logging
+  # ---------------------------------------------------------------------------
+  step_delay: 0.02       # Accelerated 50Hz simulation for high-load testing
+  log_frequency: 10      # Log every 10 steps to results/metrics_log.csv
+
+# =============================================================================
+# End of Stress-Test Configuration
+# =============================================================================

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EmergenceLab v5 | Cognitive Reactor</title>
+
+    <!-- Fonts & Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+    <!-- ==============================
+         CSS — Premium Research Lab Style
+    =============================== -->
+    <style>
+        :root {
+            --bg: #05060a;
+            --glass: rgba(255, 255, 255, 0.04);
+            --accent: #00f5d4;
+            --text: #e6f1ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 20% 30%, rgba(0, 255, 212, 0.08), transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(255, 60, 172, 0.08), transparent 40%),
+                        var(--bg);
+            color: var(--text);
+            height: 100vh; overflow: hidden;
+        }
+
+        #bgCanvas { position: fixed; inset: 0; z-index: 0; opacity: 0.15; }
+
+        .wrapper {
+            position: relative; z-index: 2;
+            display: flex; flex-direction: column; height: 100vh;
+            padding: 18px;
+        }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+        }
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem; letter-spacing: 2px;
+        }
+
+        .metrics { display: flex; gap: 20px; font-size: 0.75rem; opacity: 0.8; }
+        .status { font-size: 0.75rem; padding: 6px 14px; border-radius: 20px;
+                  border: 1px solid rgba(0, 245, 212, 0.4); background: rgba(0, 245, 212, 0.1); }
+
+        .grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .panel {
+            position: relative;
+            border-radius: 16px;
+            backdrop-filter: blur(25px);
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 18px; overflow: hidden;
+        }
+
+        .panel::before {
+            content: "";
+            position: absolute; inset: -1px;
+            border-radius: 16px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.05;
+            animation: scan 6s linear infinite;
+        }
+        @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .panel h2 { font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 8px; color: var(--accent); }
+        .chart-box { position: absolute; inset: 45px 18px 18px 18px; }
+        canvas { width: 100% !important; height: 100% !important; }
+
+        footer {
+            font-size: 0.65rem; opacity: 0.5;
+            margin-top: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        button#downloadBtn {
+            padding: 4px 10px;
+            background: var(--accent);
+            border: none; border-radius: 4px;
+            color: #05060a; cursor: pointer;
+            font-size: 0.7rem; transition: 0.2s;
+        }
+        button#downloadBtn:hover { background: #fff; }
+    </style>
+</head>
+<body>
+
+<!-- Particle Background -->
+<canvas id="bgCanvas"></canvas>
+
+<div class="wrapper">
+    <header>
+        <div>
+            <h1>EMERGENCE<span style="color:#00f5d4">LAB</span> v5</h1>
+            <div class="metrics">
+                <div id="entropyVal">Entropy: 0.000</div>
+                <div id="connVal">Connectivity: 0.000</div>
+                <div id="phaseVal">Phase: Initializing</div>
+            </div>
+        </div>
+        <div class="status" id="stat">● STANDBY</div>
+    </header>
+
+    <div class="grid">
+        <div class="panel">
+            <h2>ENTROPIC STATE DYNAMICS</h2>
+            <div class="chart-box"><canvas id="c1"></canvas></div>
+        </div>
+        <div class="panel">
+            <h2>DISTRIBUTED BELIEF TOPOLOGY</h2>
+            <div class="chart-box"><canvas id="c2"></canvas></div>
+        </div>
+        <div class="panel">
+            <h2>NETWORK CONNECTIVITY FIELD</h2>
+            <div class="chart-box"><canvas id="c3"></canvas></div>
+        </div>
+        <div class="panel">
+            <h2>INFORMATION DIVERGENCE MATRIX</h2>
+            <div class="chart-box"><canvas id="c4"></canvas></div>
+        </div>
+    </div>
+
+    <footer>
+        <span>Entropy-driven multi-agent intelligence • 2026 Research Architecture</span>
+        <button id="downloadBtn">Export Session CSV</button>
+    </footer>
+</div>
+
+<!-- ==============================
+     JavaScript — Real-Time Dashboard
+=============================== -->
+<script>
+    // Particle Background Animation
+    const bg = document.getElementById("bgCanvas");
+    const bgCtx = bg.getContext("2d");
+    bg.width = window.innerWidth; bg.height = window.innerHeight;
+    let particles = Array.from({length:70}, () => ({
+        x: Math.random()*bg.width, y: Math.random()*bg.height,
+        vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2
+    }));
+    function animateBG(){
+        bgCtx.clearRect(0,0,bg.width,bg.height);
+        bgCtx.fillStyle="#00f5d4";
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if(p.x<0||p.x>bg.width)p.vx*=-1;
+            if(p.y<0||p.y>bg.height)p.vy*=-1;
+            bgCtx.beginPath(); bgCtx.arc(p.x,p.y,1.2,0,Math.PI*2); bgCtx.fill();
+        });
+        requestAnimationFrame(animateBG);
+    }
+    animateBG();
+
+    // Core WebSocket & Charts
+    const socket = io();
+    let charts={}, entropyHistory=[], connectivityHistory=[], lastData=null;
+    const agentColors=["#00F5D4","#FF3CAC","#FFD166","#9B5DE5","#00BBF9","#F15BB5","#06D6A0","#EF476F"];
+    const baseOptions={responsive:true, maintainAspectRatio:false, animation:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{display:false},grid:{display:false}},y:{ticks:{color:"#888",font:{size:9}},grid:{color:"rgba(255,255,255,0.03)"}}}};
+
+    // WebSocket Handlers
+    socket.on("connect",()=>{document.getElementById("stat").textContent="● LIVE";});
+    socket.on("disconnect",()=>{document.getElementById("stat").textContent="● OFFLINE";});
+
+    socket.on("update",(data)=>{
+        if(!data || !data.beliefs || !data.beliefs.length) return;
+        lastData=data;
+
+        const entropy=data.entropy??0;
+        document.getElementById("entropyVal").textContent=`Entropy: ${entropy.toFixed(4)}`;
+        document.getElementById("connVal").textContent=`Connectivity: ${(data.connectivity??0).toFixed(4)}`;
+
+        const phaseEl=document.getElementById("phaseVal");
+        if(entropy<0.4){ phaseEl.textContent="Phase: Stabilizing"; phaseEl.style.color="#00f5d4"; }
+        else{ phaseEl.textContent="Phase: High Flux"; phaseEl.style.color="#ff3cac"; }
+
+        entropyHistory.push(entropy); connectivityHistory.push(data.connectivity??0);
+        if(entropyHistory.length>60){ entropyHistory.shift(); connectivityHistory.shift(); }
+
+        // Panel 1: Entropy Line Chart
+        if(!charts.c1){
+            const ctx=document.getElementById("c1").getContext("2d");
+            const grad=ctx.createLinearGradient(0,0,0,200);
+            grad.addColorStop(0,"rgba(0,245,212,0.3)"); grad.addColorStop(1,"transparent");
+            charts.c1=new Chart(ctx,{type:"line",data:{labels:new Array(60).fill(0),datasets:[{data:entropyHistory,borderColor:"#00f5d4",backgroundColor:grad,fill:true,tension:0.3,pointRadius:0,borderWidth:2}]},options:baseOptions});
+        } else { charts.c1.data.datasets[0].data=entropyHistory; charts.c1.update("none"); }
+
+        // Panel 2: Distributed Beliefs (Radar)
+        if(!charts.c2){
+            charts.c2=new Chart(document.getElementById("c2"),{
+                type:"radar",
+                data:{labels:data.beliefs[0].belief.map((_,i)=>"S"+i),datasets:data.beliefs.map((b,i)=>({data:b.belief,borderColor:agentColors[i%agentColors.length],backgroundColor:agentColors[i%agentColors.length]+"22",borderWidth:1,pointRadius:1}))},
+                options:{...baseOptions,scales:{r:{grid:{color:"rgba(255,255,255,0.05)"},angleLines:{color:"rgba(255,255,255,0.05)"},ticks:{display:false},suggestedMin:0,suggestedMax:1}}}
+            });
+        } else { data.beliefs.forEach((b,i)=>{if(charts.c2.data.datasets[i]) charts.c2.data.datasets[i].data=b.belief;}); charts.c2.update("none"); }
+
+        // Panel 4: KL Divergence (Bar)
+        if(data.kl_matrix){
+            const avgKL=data.kl_matrix.map(row=>row.reduce((a,b)=>a+(b||0),0)/row.length);
+            if(!charts.c4){
+                charts.c4=new Chart(document.getElementById("c4"),{type:"bar",data:{labels:data.beliefs.map(b=>b.agent),datasets:[{data:avgKL,backgroundColor:"#9B5DE5",borderRadius:4}]},options:baseOptions});
+            } else { charts.c4.data.datasets[0].data=avgKL; charts.c4.update("none"); }
+        }
+
+        updateNetworkData(data);
+    });
+
+    // Panel 3: Network Field
+    const netCanvas=document.getElementById("c3");
+    const netCtx=netCanvas.getContext("2d"); let nodes=[], edges=[];
+    function resizeNet(){ netCanvas.width=netCanvas.offsetWidth; netCanvas.height=netCanvas.offsetHeight; }
+    window.addEventListener("resize",resizeNet); resizeNet();
+
+    function updateNetworkData(data){
+        if(!data.beliefs) return;
+        if(nodes.length===0){
+            nodes=data.beliefs.map((b,i)=>({id:i,label:b.agent,beliefs:b.belief,x:Math.random()*netCanvas.width,y:Math.random()*netCanvas.height,vx:0,vy:0}));
+        } else { data.beliefs.forEach((b,i)=>{if(nodes[i]) nodes[i].beliefs=b.belief;}); }
+        edges=[];
+        for(let i=0;i<nodes.length;i++){
+            for(let j=i+1;j<nodes.length;j++){
+                const d=Math.sqrt(nodes[i].beliefs.reduce((sum,val,k)=>sum+(val-nodes[j].beliefs[k])**2,0)/nodes[i].beliefs.length);
+                edges.push({a:i,b:j,weight:Math.max(0,1-d)});
+            }
+        }
+    }
+
+    function solvePhysics(){
+        const rep=800,spring=0.005,damping=0.9,speed=0.1;
+        nodes.forEach((n1,i)=>{
+            nodes.forEach((n2,j)=>{ if(i===j) return; const dx=n2.x-n1.x, dy=n2.y-n1.y, d=Math.sqrt(dx*dx+dy*dy)+0.1; const f=rep/(d*d); n1.vx-=f*dx/d*speed; n1.vy-=f*dy/d*speed; });
+            edges.forEach(e=>{ if(e.a!==i && e.b!==i) return; const other=nodes[e.a===i?e.b:e.a]; const dx=other.x-n1.x, dy=other.y-n1.y, d=Math.sqrt(dx*dx+dy*dy); const target=100*(1-e.weight), f=spring*(d-target); n1.vx+=f*dx/d*speed; n1.vy+=f*dy/d*speed; });
+            n1.vx*=damping; n1.vy*=damping; n1.x+=n1.vx; n1.y+=n1.vy;
+            if(n1.x<20||n1.x>netCanvas.width-20)n1.vx*=-1;
+            if(n1.y<20||n1.y>netCanvas.height-20)n1.vy*=-1;
+        });
+    }
+
+    function drawNetwork(){
+        netCtx.clearRect(0,0,netCanvas.width,netCanvas.height);
+        edges.forEach(e=>{ const n1=nodes[e.a],n2=nodes[e.b]; if(e.weight<0.2)return; netCtx.beginPath(); netCtx.moveTo(n1.x,n1.y); netCtx.lineTo(n2.x,n2.y); netCtx.strokeStyle=`rgba(0,245,212,${e.weight*0.2})`; netCtx.lineWidth=e.weight*2; netCtx.stroke(); });
+        nodes.forEach((n,i)=>{ const col=agentColors[i%agentColors.length]; netCtx.beginPath(); netCtx.arc(n.x,n.y,8,0,Math.PI*2); netCtx.fillStyle=col; netCtx.shadowBlur=15; netCtx.shadowColor=col; netCtx.fill(); netCtx.shadowBlur=0; });
+    }
+
+    function loop(){ solvePhysics(); drawNetwork(); requestAnimationFrame(loop); }
+    loop();
+
+    // Export CSV
+    document.getElementById("downloadBtn").onclick=()=>{
+        if(!lastData) return;
+        let csv="Step,Entropy,Connectivity\n";
+        entropyHistory.forEach((e,i)=>csv+=`${i},${e},${connectivityHistory[i]}\n`);
+        const blob=new Blob([csv],{type:"text/csv"});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement("a"); a.href=url; a.download="emergencelab_data.csv"; a.click();
+    };
+</script>
+</body>
+</html>

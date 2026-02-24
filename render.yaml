@@ -1,0 +1,32 @@
+# =============================================================================
+# 🛡️ EmergenceLab v5
+# Deployment Configuration
+# Platform : Render (Docker Runtime)
+# Environment : Production / Public Web Service
+# =============================================================================
+
+
+services:
+  # ---------------------------------------------------------------------------
+  # 🌐 Web Service — Real-Time Cognitive Dashboard
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: emergencelab
+
+    # Runtime Environment
+    env: docker
+
+    # Deployment Plan
+    plan: free
+
+    # Continuous Deployment Settings
+    autoDeploy: true
+    branch: main
+
+    # Application Port (Flask-SocketIO)
+    port: 5000
+
+
+# =============================================================================
+# End of Deployment Configuration
+# =============================================================================
