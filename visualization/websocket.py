@@ -80,7 +80,4 @@ def index():
 # =============================================================================
 # 🧵 Start Watcher Thread Automatically
 # =============================================================================
-threading.Thread(
-    target=watch_json,
-    daemon=True  # ensures background thread exits with main process
-).start()
+socketio.start_background_task(watch_json)
